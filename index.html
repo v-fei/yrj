@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Only You</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100%;
+      /* background: linear-gradient(45deg, #ff6b6b, #ff8e8e); */
+      overflow: hidden;
+      font-family: 'Microsoft YaHei', sans-serif;
+    }
+
+    canvas {
+      display: block;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      z-index: 5;
+      background: url("img/bg.jpg") no-repeat;
+      background-size: cover;
+    }
+
+    .container {
+      position: fixed;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      color: #ff4757;
+      font-size: 24px;
+      animation: fall 3s linear infinite;
+      user-select: none;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .message-box {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 80%;
+      transition: transform 0.3s;
+    }
+
+    .message-box:hover {
+      transform: scale(1.05);
+    }
+
+    input {
+      padding: 0.5rem;
+      margin: 1rem 0;
+      border: 2px solid #ff6b6b;
+      border-radius: 5px;
+      width: 200px;
+    }
+
+    button {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.1rem;
+    }
+
+    button:hover {
+      background: #ff4757;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .next-div {
+      display: none;
+      position: fixed;
+      top: 60%;
+      margin-top: 40px;
+      left: 50%;
+    }
+
+    #loveMessage {
+      font-size: 1.5rem;
+      color: #2d3436;
+      line-height: 2rem;
+    }
+
+    /* 3D Button */
+    .btn-3d {
+      position: relative;
+      display: inline-block;
+      font-size: 22px;
+      padding: 20px 60px;
+      color: white;
+      margin: 20px 10px 10px;
+      border-radius: 6px;
+      text-align: center;
+      transition: top .01s linear;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-3d.cyan:hover {
+      /* background-color: #82D1E3; */
+      background-image: linear-gradient(to right, #ebc0fd 0%, #d9ded8 100%);
+    }
+
+    .btn-3d:active {
+      top: 9px;
+    }
+
+    .btn-3d.cyan {
+      /* background-color: #7fccde; */
+      background-image: linear-gradient(to right, #ebc0fd 0%, #d9ded8 100%);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div id="messageBoxId" class="message-box">
+      <h1>💖 请输入你的名字 💖</h1>
+      <input type="text" id="nameInput" placeholder="你的名字...">
+      <button onclick="showLoveMessage()">开启心动</button>
+      <div id="loveMessage" class="hidden"></div>
+    </div>
+    <div id="nextBtnId" class="next-div"><a href="diyHappy.html" class="btn-3d cyan">下一场景</a></div>
+  </div>
+  <canvas id="canvas"></canvas>
+  <audio id="myAudio" src="./music/bg1.mp3" controls style="display: none;" loop></audio>
+  <script>
+    // 创建飘落的心形
+    function createHearts() {
+      setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerHTML = '❤';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = Math.random() * 2 + 3 + 's';
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 5000);
+      }, 300);
+    }
+
+    // 显示表白信息
+    function showLoveMessage() {
+      const nameInputValue = document.getElementById('nameInput').value.trim()
+      if (!(nameInputValue == '' || nameInputValue == '' || nameInputValue == '' || nameInputValue == '')) {
+        alert('对不起！这不属于你的专场')
+        document.getElementById('nameInput').value = ''
+        return
+      }
+      //开启音乐
+      const music = document.getElementById("myAudio"); //获取ID  
+      if (music.paused) {
+        music.paused = false;
+        music.play();
+      }
+      const name = nameInputValue || '亲爱的';
+      const messageBox = document.getElementById('loveMessage');
+
+      document.querySelector('button').classList.add('hidden');
+      messageBox.classList.remove('hidden');
+
+      const messages = [
+        `遇见你是我最美丽的意外 ${name}💘`,
+        "你的笑容是我的每日阳光 ☀",
+        "我愿用余生为你写诗 📖",
+        "在茫茫人海中，我只看见你 👫",
+        "你愿意和我一起续写这个故事吗？ 🎬"
+      ];
+
+      let index = 0;
+      const typeWriter = setInterval(() => {
+        if (index < messages.length) {
+          messageBox.innerHTML = messages[index];
+          index++;
+        } else {
+          clearInterval(typeWriter);
+          createFireworks();
+          document.getElementById("nextBtnId").style.display = "block";
+        }
+      }, 3000);
+    }
+
+    // 烟花效果
+    function createFireworks() {
+      const colors = ['#ff9ff3', '#f368e0', '#ff6b6b', '#ee5253'];
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.style.position = 'absolute';
+        particle.style.width = '8px';
+        particle.style.height = '8px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.borderRadius = '50%';
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        particle.style.transform = `translate(-50%, -50%)`;
+
+        const angle = (Math.random() * 360) * Math.PI / 180;
+        const velocity = 3 + Math.random() * 5;
+        const dx = Math.cos(angle) * velocity;
+        const dy = Math.sin(angle) * velocity;
+
+        document.body.appendChild(particle);
+
+        let x = 50;
+        let y = 50;
+        const animate = () => {
+          x += dx;
+          y += dy;
+          particle.style.left = x + '%';
+          particle.style.top = y + '%';
+          particle.style.opacity = 1 - (Math.abs(50 - x) + Math.abs(50 - y)) / 100;
+
+          if (x < 0 || x > 100 || y < 0 || y > 100) {
+            particle.remove();
+          } else {
+            requestAnimationFrame(animate);
+          }
+        };
+        animate();
+      }
+    }
+
+    // 初始化爱心雨
+    // createHearts();
+    let num = 100
+    let stop
+    let newHuabanList = new huabanList()
+
+    function startDraw() {
+      // 定义画布
+      let canvas = document.querySelector("canvas"), ctx;
+
+      // 初始化画布的宽高
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx = canvas.getContext("2d");
+
+      ctx.save()
+
+      // 生成花瓣
+      for (let i = 0; i < num; i++) {
+        let randomX, randomY, randomS, randomR, newHuaban;
+        randomX = getRandom("x");
+        randomY = getRandom("y");
+        randomR = getRandom("r");
+        randomS = getRandom("s");
+        newHuaban = new huaban(randomX, randomY, randomS, randomR);
+        newHuabanList.push(newHuaban);
+      }
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+      // 画花瓣
+      newHuabanList.draw(ctx)
+      // 动画
+      stop = requestAnimationFrame(function () {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空画布
+        newHuabanList.update(); // 更新
+        newHuabanList.draw(ctx); // 绘制
+        stop = requestAnimationFrame(arguments.callee); // 递归重绘
+      });
+    }
+
+    let img = new Image();
+    img.src = "img/huaban.png";
+
+    // 图片加载完成时开始画
+    img.onload = function () {
+      startDraw()
+    }
+
+    // 画布大小改变时重新初始化画布
+    // window.onresize = function () {
+    //   startDraw()
+    // }
+
+    function huaban(x, y, s, r) {
+      this.x = x
+      this.y = y
+      this.s = s
+      this.r = r
+    }
+    huaban.prototype.draw = function (ctx) {
+      ctx.translate(this.x, this.y)
+      ctx.rotate(this.r)
+      ctx.drawImage(img, 0, 0, 40 * this.s, 40 * this.s)
+
+      ctx.restore()
+      ctx.save()
+    }
+    huaban.prototype.update = function () {
+      this.x = getRandom("fnx")(this.x, this.y)
+      this.y = getRandom("fny")(this.x, this.y)
+      this.r = getRandom("fnr")(this.r)
+      if (
+        // 判断是否超出边界
+        this.x > window.innerWidth ||
+        this.x < 0 ||
+        this.y > window.innerHeight ||
+        this.y < 0
+      ) {
+        // 如果超出边界 则重新生成随机坐标
+        this.r = getRandom("fnr");
+        if (Math.random() > 0.4) {
+          // 如果随机值大于0.4 则重新生成x轴随机坐标
+          this.x = getRandom("x");
+          this.y = 0;
+          this.s = getRandom("s");
+          this.r = getRandom("r");
+        } else {
+          // 如果随机值小于0.4 则重新生成y轴随机坐标
+          this.x = window.innerWidth;
+          this.y = getRandom("y");
+          this.s = getRandom("s");
+          this.r = getRandom("r");
+        }
+      }
+    }
+
+    function huabanList() {
+      this.list = []
+    }
+    huabanList.prototype.draw = function (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      this.list.forEach((item) => {
+        item.draw(ctx)
+      })
+    }
+    huabanList.prototype.push = function (item) {
+      this.list.push(item)
+    }
+    huabanList.prototype.update = function () {
+      this.list.forEach((item) => {
+        item.update()
+      })
+    }
+
+    function getRandom(option) {
+      var ret, random;
+      switch (option) {
+        case "x":
+          // x轴随机坐标
+          ret = Math.random() * window.innerWidth;
+          break;
+        case "y":
+          // y轴随机坐标
+          ret = Math.random() * window.innerHeight;
+          break;
+        case "s":
+          ret = Math.random();
+          break;
+        case "r":
+          ret = Math.random() * 6;
+          break;
+        case "fnx":
+          // x轴随机函数
+          random = -0.1 + Math.random() * 1;
+          ret = function (x, y) {
+            return x + 0.5 * random - 1;
+          };
+          break;
+        case "fny":
+          // y轴随机函数
+          random = 0.4 + Math.random() * 0.7;
+          ret = function (x, y) {
+            return y + random;
+          };
+          break;
+        case "fnr":
+          // r轴随机函数
+          random = Math.random() * 0.02;
+          ret = function (r) {
+            return r + random;
+          };
+          break;
+      }
+      return ret;
+    }
+
+  </script>
+</body>
+
+</html>
